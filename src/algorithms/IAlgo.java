@@ -4,5 +4,7 @@ public interface IAlgo {
 
     int[] executeAlgo(int[] costsArr, int[] coinsArr);
 
-    int getPairQuantity();
+    int getPairsNumber();
+
+    int getMutateChance();
 }
