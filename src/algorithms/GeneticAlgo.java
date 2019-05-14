@@ -111,7 +111,9 @@ public class GeneticAlgo implements IAlgo {
             }
             bottomBound = topBound;
         }
-        return ++individIndex;
+
+        //!!!проверить ретурн
+        return individIndex;
     }
 
     private void setFitScoreAndInvertRatio(Individ individ, int[] model) {
