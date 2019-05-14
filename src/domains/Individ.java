@@ -2,14 +2,17 @@ package domains;
 
 public class Individ implements Comparable{
     private int[] chromosome;
-    private int fitScore;
-    private double invertRatio;
+    private int fitDeviation = 0;
 
-    public Individ(int[] chromosome, int fitScore, double invertRatio) {
+    public Individ(int[] chromosome) {
         this.chromosome = chromosome;
-        this.fitScore = fitScore;
-        this.invertRatio = invertRatio;
     }
+
+    //
+    public Individ(int fitDeviation) {
+        this.fitDeviation = fitDeviation;
+    }
+    //
 
     public int[] getChromosome() {
         return chromosome;
@@ -19,32 +22,24 @@ public class Individ implements Comparable{
         return chromosome[i];
     }
 
-    public void setChromosome(int[] chromosome) {
-        this.chromosome = chromosome;
+    public int getFitDeviation() {
+        return fitDeviation;
     }
 
-    public void setChromosomeI(int gene, int i) {
-        this.chromosome[i] = gene;
-    }
-
-    public int getFitScore() {
-        return fitScore;
-    }
-
-    public void setFitScore(int fitScore) {
-        this.fitScore = fitScore;
+    public void setFitDeviation(int fitDeviation) {
+        this.fitDeviation = fitDeviation;
     }
 
     public double getInvertRatio() {
-        return invertRatio;
-    }
-
-    public void setInvertRatio(double invertRatio) {
-        this.invertRatio = invertRatio;
+        if (fitDeviation == 0){
+            return 1000000.0;
+        } else {
+            return 1.0 / fitDeviation;
+        }
     }
 
     @Override
     public int compareTo(Object o) {
-        return fitScore - ((Individ) o).fitScore;
+        return fitDeviation - ((Individ) o).fitDeviation;
     }
 }

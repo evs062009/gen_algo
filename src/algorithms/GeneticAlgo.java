@@ -24,11 +24,11 @@ public class GeneticAlgo implements IAlgo {
                 resetTerminateCounter = false;
 
                 for (Individ individ : population) {
-                    if (individ.getFitScore() == Arrays.stream(model).sum() - Arrays.stream(individ.getChromosome())
+                    if (individ.getFitDeviation() == Arrays.stream(model).sum() - Arrays.stream(individ.getChromosome())
                             .sum()) {
                         return individ.getChromosome();         //optimal solution
                     }
-                    if (individ.getFitScore() < betterIndivid.getFitScore()) {
+                    if (individ.getFitDeviation() < betterIndivid.getFitDeviation()) {
                         betterIndivid = individ;
                         resetTerminateCounter = true;
                     }
@@ -50,8 +50,8 @@ public class GeneticAlgo implements IAlgo {
         List<Individ> population = new ArrayList<>(getPopulationSize());
         for (int i = 0; i < getPopulationSize(); i++) {
             int[] chromosome = shuffle(input);
-            Individ individ = new Individ(chromosome, 0, 0);
-            setFitScoreAndInvertRatio(individ, model);
+            Individ individ = new Individ(chromosome);
+            fitTest(individ, model);
             population.add(individ);
         }
         return population;
@@ -60,15 +60,16 @@ public class GeneticAlgo implements IAlgo {
     private List<Individ> evolve(int[] model, List<Individ> population) {
         List<Individ> parents;
         List<Individ> children = new ArrayList<>(getNumberOfPairs() * 2);
+        double totalInvertRatio = population.stream().map(Individ::getInvertRatio).reduce(0.0, Double::sum);
 
         for (int i = 0; i < getNumberOfPairs(); i++) {
-            parents = getParents(population);
+            parents = getParents(population, totalInvertRatio);
             children.addAll(getChildren(parents, model));
         }
         return createNewPopulation(population, children);
     }
 
-    private int[] shuffle(int[] input) {
+    public int[] shuffle(int[] input) {
         int[] arr = Arrays.copyOf(input, input.length);
         for (int i = arr.length - 1; i > 0; i--) {
             swap(arr, i, random.nextInt(i));
@@ -76,15 +77,16 @@ public class GeneticAlgo implements IAlgo {
         return arr;
     }
 
+    //ok
     private void swap(int[] arr, int i, int j) {
         int temp = arr[i];
         arr[i] = arr[j];
         arr[j] = temp;
     }
 
-    private List<Individ> getParents(List<Individ> population) {
+    //ok
+    private List<Individ> getParents(List<Individ> population, double totalInvertRatio) {
         List<Individ> parents = new ArrayList<>(2);
-        double totalInvertRatio = population.stream().map(Individ::getInvertRatio).reduce(0.0, Double::sum);
         int fatherIndex = chooseParent(population, totalInvertRatio);
         int motherIndex = chooseParent(population, totalInvertRatio);
 
@@ -98,6 +100,7 @@ public class GeneticAlgo implements IAlgo {
         return parents;
     }
 
+    //ok
     private int chooseParent(List<Individ> population, double totalInvertRatio) {
         double parentSign = random.nextDouble();
         double bottomBound = 0;
@@ -111,23 +114,22 @@ public class GeneticAlgo implements IAlgo {
             }
             bottomBound = topBound;
         }
-
-        //!!!проверить ретурн
         return individIndex;
     }
 
-    private void setFitScoreAndInvertRatio(Individ individ, int[] model) {
-        int sum = 0;
+    //ok
+    private void fitTest(Individ individ, int[] model) {
+        int totalDeviation = 0;
         for (int i = 0; i < individ.getChromosome().length; i++) {
-            int diff = model[i] - individ.getChromosomeI(i);
-            if (diff > 0) {
-                sum += diff;
+            int deviation = model[i] - individ.getChromosomeI(i);
+            if (deviation > 0) {
+                totalDeviation += deviation;
             }
         }
-        individ.setFitScore(sum);
-        individ.setInvertRatio((individ.getFitScore() == 0) ? (1000000000) : (1.0 / individ.getFitScore()));
+        individ.setFitDeviation(totalDeviation);
     }
 
+    //ok
     private List<Individ> getChildren(List<Individ> parents, int[] model) {
         List<Individ> children = new ArrayList<>(2);
         int length = parents.get(0).getChromosome().length;
@@ -144,12 +146,13 @@ public class GeneticAlgo implements IAlgo {
                 chromosome2[i] = parents.get(0).getChromosomeI(i);
             }
         }
-        children.addAll(Arrays.asList(  new Individ(chromosome1, 0, 0),
-                                        new Individ(chromosome2, 0, 0)));
-        return children.stream().peek(this::mutate).peek(child -> setFitScoreAndInvertRatio(child, model))
+        children.addAll(Arrays.asList(  new Individ(chromosome1),
+                                        new Individ(chromosome2)));
+        return children.stream().peek(this::mutate).peek(child -> fitTest(child, model))
                 .collect(Collectors.toList());
     }
 
+    //ok
     private void mutate(Individ child) {
         double mutateSign = random.nextDouble();
         if (mutateSign < getMutateChance()) {
@@ -162,6 +165,7 @@ public class GeneticAlgo implements IAlgo {
         }
     }
 
+    //проверить
     private List<Individ> createNewPopulation(List<Individ> population, List<Individ> children) {
         return Stream.concat(population.stream(), children.stream()).sorted().limit(population.size())
                 .collect(Collectors.toList());
