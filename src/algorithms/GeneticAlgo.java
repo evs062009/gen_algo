@@ -4,6 +4,8 @@ import domains.Individ;
 
 import java.security.InvalidParameterException;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class GeneticAlgo implements IAlgo {
     private Random random = new Random();
@@ -12,14 +14,14 @@ public class GeneticAlgo implements IAlgo {
     public int[] executeAlgo(int[] model, int[] input) throws IndexOutOfBoundsException {
         if (model.length == input.length) {
 
-            List<Individ> population = initPopulation(input);
+            List<Individ> population = initiatePopulation(model, input);
 
             Individ betterIndivid = population.get(0);
-            int roundCounter = 0;
-            boolean resetRoundCounter;
+            int terminateCounter = 0;
+            boolean resetTerminateCounter;
 
             while (true) {
-                resetRoundCounter = false;
+                resetTerminateCounter = false;
 
                 for (Individ individ : population) {
                     if (individ.getFitScore() == Arrays.stream(model).sum() - Arrays.stream(individ.getChromosome())
@@ -28,12 +30,12 @@ public class GeneticAlgo implements IAlgo {
                     }
                     if (individ.getFitScore() < betterIndivid.getFitScore()) {
                         betterIndivid = individ;
-                        resetRoundCounter = true;
+                        resetTerminateCounter = true;
                     }
                 }
-                if (resetRoundCounter) {
-                    roundCounter = 0;
-                } else if (roundCounter++ > 4) {
+                if (resetTerminateCounter) {
+                    terminateCounter = 0;
+                } else if (terminateCounter++ > 4) {
                     return betterIndivid.getChromosome();
                 }
 
@@ -44,29 +46,26 @@ public class GeneticAlgo implements IAlgo {
         }
     }
 
-    private List<Individ> evolve(int[] model, List<Individ> population) {
-        List<Individ> parents;
-        List<Individ> children;
-
-        for (int i = 0; i < getPairsNumber(); i++) {
-            parents = chooseParents(population);
-            children = breed(parents);
-            mutate(children);
-            fitTest(children, model);
-            population = createNewPopulation(population, children);
+    private List<Individ> initiatePopulation(int[] model, int[] input) {
+        List<Individ> population = new ArrayList<>(getPopulationSize());
+        for (int i = 0; i < getPopulationSize(); i++) {
+            int[] chromosome = shuffle(input);
+            Individ individ = new Individ(chromosome, 0, 0);
+            setFitScoreAndInvertRatio(individ, model);
+            population.add(individ);
         }
         return population;
     }
 
-    private List<Individ> initPopulation(int[] input, int[] model) {
-        List<Individ> population = new ArrayList<>(getPopulationSize());
-        for (int i = 0; i < getPopulationSize(); i++) {
-            int[] chromosome = shuffle(input);
-            Individ individ = new Individ(chromosome, 0);
-            individ.setFitScore(fitTest(individ.getChromosome(), model));
-            population.add(individ);
+    private List<Individ> evolve(int[] model, List<Individ> population) {
+        List<Individ> parents;
+        List<Individ> children = new ArrayList<>(getNumberOfPairs() * 2);
+
+        for (int i = 0; i < getNumberOfPairs(); i++) {
+            parents = getParents(population);
+            children.addAll(getChildren(parents, model));
         }
-        return population;
+        return createNewPopulation(population, children);
     }
 
     private int[] shuffle(int[] input) {
@@ -83,73 +82,97 @@ public class GeneticAlgo implements IAlgo {
         arr[j] = temp;
     }
 
-    private int fitTest(int[] chromosome, int[] model) throws IndexOutOfBoundsException {
+    private List<Individ> getParents(List<Individ> population) {
+        List<Individ> parents = new ArrayList<>(2);
+        double totalInvertRatio = population.stream().map(Individ::getInvertRatio).reduce(0.0, Double::sum);
+        int fatherIndex = chooseParent(population, totalInvertRatio);
+        int motherIndex = chooseParent(population, totalInvertRatio);
+
+        if (motherIndex == fatherIndex) {
+            motherIndex = motherIndex + population.size() / 2;
+            if (motherIndex >= population.size()) {
+                motherIndex = motherIndex - population.size();
+            }
+        }
+        parents.addAll(Arrays.asList(population.get(fatherIndex), population.get(motherIndex)));
+        return parents;
+    }
+
+    private int chooseParent(List<Individ> population, double totalInvertRatio) {
+        double parentSign = random.nextDouble();
+        double bottomBound = 0;
+        double topBound;
+        int individIndex;
+
+        for (individIndex = 0; individIndex < population.size() - 1; individIndex++) {
+            topBound = bottomBound + population.get(individIndex).getInvertRatio() / totalInvertRatio;
+            if (parentSign >= bottomBound && parentSign < topBound) {
+                return individIndex;
+            }
+            bottomBound = topBound;
+        }
+        return ++individIndex;
+    }
+
+    private void setFitScoreAndInvertRatio(Individ individ, int[] model) {
         int sum = 0;
-        for (int i = 0; i < chromosome.length; i++) {
-            int diff = model[i] - chromosome[i];
+        for (int i = 0; i < individ.getChromosome().length; i++) {
+            int diff = model[i] - individ.getChromosomeI(i);
             if (diff > 0) {
                 sum += diff;
             }
         }
-        return sum;
+        individ.setFitScore(sum);
+        individ.setInvertRatio((individ.getFitScore() == 0) ? (1000000000) : (1.0 / individ.getFitScore()));
     }
 
-    private void refreshPopulation(List<Individ> population, int[] model) {
-        for (int i = 0; i < getPairsNumber(); i++) {
-            Individ father = population.get(i * 2);
-            Individ mother = population.get(i * 2 + 1);
-            List<Individ> children = cross(father, mother, model);
-            for (int j = 0; j < children.size(); j++) {
-                population.set(getPairsNumber() * (2 + i) + j, children.get(j));
-            }
-        }
-    }
+    private List<Individ> getChildren(List<Individ> parents, int[] model) {
+        List<Individ> children = new ArrayList<>(2);
+        int length = parents.get(0).getChromosome().length;
+        int crossPoint = random.nextInt(length - 2);
+        int[] chromosome1 = new int[length];
+        int[] chromosome2 = new int[length];
 
-    private List<Individ> cross(Individ father, Individ mother, int[] model) {
-        final int length = father.getChromosome().length;
-        int crossPoint = random.nextInt(length - 1);
-        int[] children = new int[length];
-        int[] chromosomeOffspring2 = new int[length];
         for (int i = 0; i < length; i++) {
             if (i <= crossPoint) {
-                children[i] = father.getChromosomeI(i);
-                chromosomeOffspring2[i] = mother.getChromosomeI(i);
+                chromosome1[i] = parents.get(0).getChromosomeI(i);
+                chromosome2[i] = parents.get(1).getChromosomeI(i);
             } else {
-                children[i] = mother.getChromosomeI(i);
-                chromosomeOffspring2[i] = father.getChromosomeI(i);
+                chromosome1[i] = parents.get(1).getChromosomeI(i);
+                chromosome2[i] = parents.get(0).getChromosomeI(i);
             }
         }
-        Individ offspring1 = new Individ(children, 0);
-        Individ offspring2 = new Individ(chromosomeOffspring2, 0);
-        mutate(offspring1);
-        mutate(offspring2);
-        fitTest(offspring1, model);
-        fitTest(offspring1, model);
-        return Arrays.asList(offspring1, offspring2);
+        children.addAll(Arrays.asList(  new Individ(chromosome1, 0, 0),
+                                        new Individ(chromosome2, 0, 0)));
+        return children.stream().peek(this::mutate).peek(child -> setFitScoreAndInvertRatio(child, model))
+                .collect(Collectors.toList());
     }
 
-    private void mutate(Individ offspring) {
-        int mutateSign = random.nextInt(100);
+    private void mutate(Individ child) {
+        double mutateSign = random.nextDouble();
         if (mutateSign < getMutateChance()) {
-            int length = offspring.getChromosome().length;
+            int length = child.getChromosome().length;
             int index1 = random.nextInt(length);
             int index2 = random.nextInt(length);
             if (index1 != index2) {
-                int temp = offspring.getChromosomeI(index1);
-                offspring.setChromosomeI(index1, offspring.getChromosomeI(index2));
-                offspring.setChromosomeI(index2, temp);
+                swap(child.getChromosome(), index1, index2);
             }
         }
     }
 
+    private List<Individ> createNewPopulation(List<Individ> population, List<Individ> children) {
+        return Stream.concat(population.stream(), children.stream()).sorted().limit(population.size())
+                .collect(Collectors.toList());
+    }
+
     @Override
-    public int getPairsNumber() {
+    public int getNumberOfPairs() {
         return 2;
     }
 
     @Override
-    public int getMutateChance() {
-        return 5;
+    public double getMutateChance() {
+        return 0.05;
     }
 
     @Override

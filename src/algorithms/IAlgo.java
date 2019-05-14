@@ -4,9 +4,9 @@ public interface IAlgo {
 
     int[] executeAlgo(int[] model, int[] input);
 
-    int getPairsNumber();
+    int getNumberOfPairs();
 
-    int getMutateChance();
+    double getMutateChance();
 
     int getPopulationSize();
 }

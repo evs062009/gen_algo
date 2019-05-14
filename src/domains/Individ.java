@@ -1,13 +1,14 @@
 package domains;
 
 public class Individ implements Comparable{
-
     private int[] chromosome;
     private int fitScore;
+    private double invertRatio;
 
-    public Individ(int[] chromosome, int fitScore) {
+    public Individ(int[] chromosome, int fitScore, double invertRatio) {
         this.chromosome = chromosome;
         this.fitScore = fitScore;
+        this.invertRatio = invertRatio;
     }
 
     public int[] getChromosome() {
@@ -32,6 +33,14 @@ public class Individ implements Comparable{
 
     public void setFitScore(int fitScore) {
         this.fitScore = fitScore;
+    }
+
+    public double getInvertRatio() {
+        return invertRatio;
+    }
+
+    public void setInvertRatio(double invertRatio) {
+        this.invertRatio = invertRatio;
     }
 
     @Override
