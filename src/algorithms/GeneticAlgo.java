@@ -18,9 +18,28 @@ public class GeneticAlgo implements IAlgo {
 
             Individ betterIndivid = population.get(0);
             int terminateCounter = 0;
+
+            //
+            int counter = 0;
+            //
+
             boolean resetTerminateCounter;
 
             while (true) {
+
+                //
+                System.out.println();
+                System.out.println("-----------------------------------");
+                System.out.println("generation " + counter);
+                for (int i = 0; i < population.size(); i++) {
+                    System.out.println(population.get(i).toString(i));
+                }
+                System.out.println("-----------------------------------");
+                System.out.println(": average fitDeviation = " +
+                        (double)population.stream().map(Individ::getFitDeviation).reduce(0, Integer::sum) /
+                                population.size() + ", better result: " + betterIndivid.getFitDeviation() + "\n");
+                //
+
                 resetTerminateCounter = false;
 
                 for (Individ individ : population) {
@@ -35,11 +54,16 @@ public class GeneticAlgo implements IAlgo {
                 }
                 if (resetTerminateCounter) {
                     terminateCounter = 0;
-                } else if (terminateCounter++ > 4) {
+                } else if (++terminateCounter > 10) {
                     return betterIndivid.getChromosome();
                 }
 
                 population = evolve(model, population);
+
+                //
+                counter++;
+                //
+
             }
         } else {
             throw new InvalidParameterException("Coins quantity is not equal checkpoint quantity.");
@@ -69,7 +93,8 @@ public class GeneticAlgo implements IAlgo {
         return createNewPopulation(population, children);
     }
 
-    public int[] shuffle(int[] input) {
+    //ok
+    private int[] shuffle(int[] input) {
         int[] arr = Arrays.copyOf(input, input.length);
         for (int i = arr.length - 1; i > 0; i--) {
             swap(arr, i, random.nextInt(i));
@@ -165,7 +190,6 @@ public class GeneticAlgo implements IAlgo {
         }
     }
 
-    //проверить
     private List<Individ> createNewPopulation(List<Individ> population, List<Individ> children) {
         return Stream.concat(population.stream(), children.stream()).sorted().limit(population.size())
                 .collect(Collectors.toList());

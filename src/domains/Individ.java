@@ -1,5 +1,7 @@
 package domains;
 
+import java.util.Arrays;
+
 public class Individ implements Comparable{
     private int[] chromosome;
     private int fitDeviation = 0;
@@ -7,12 +9,6 @@ public class Individ implements Comparable{
     public Individ(int[] chromosome) {
         this.chromosome = chromosome;
     }
-
-    //
-    public Individ(int fitDeviation) {
-        this.fitDeviation = fitDeviation;
-    }
-    //
 
     public int[] getChromosome() {
         return chromosome;
@@ -41,5 +37,11 @@ public class Individ implements Comparable{
     @Override
     public int compareTo(Object o) {
         return fitDeviation - ((Individ) o).fitDeviation;
+    }
+
+    //
+
+    public String toString(int i) {
+        return i + ") " + " chromosome = " + Arrays.toString(chromosome) + ", fitDeviation = " + fitDeviation;
     }
 }
