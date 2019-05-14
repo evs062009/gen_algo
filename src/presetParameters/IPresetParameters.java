@@ -10,7 +10,7 @@ public interface IPresetParameters {
 
     int totalCostMoreThan();
 
-    int [] getCostsArr();
+    int[] getCostsArr();
 
-    int [] getCoinsArr();
+    int[] getCoinsArr();
 }

@@ -1,11 +1,11 @@
 package domains;
 
-public class Individual implements Comparable{
+public class Individ implements Comparable{
 
-    private int [] chromosome;
+    private int[] chromosome;
     private int fitScore;
 
-    public Individual(int[] chromosome, int fitScore) {
+    public Individ(int[] chromosome, int fitScore) {
         this.chromosome = chromosome;
         this.fitScore = fitScore;
     }
@@ -36,6 +36,6 @@ public class Individual implements Comparable{
 
     @Override
     public int compareTo(Object o) {
-        return fitScore - ((Individual) o).fitScore;
+        return fitScore - ((Individ) o).fitScore;
     }
 }

@@ -47,8 +47,8 @@ public class PresetParameters implements IPresetParameters {
     @Override
     public int[] getCoinsArr() {
         int[] coinsArr = new int[getCheckPointsNumber()];
-        for (int i = getMinCoin() - 1; i < coinsArr.length; i++) {
-            coinsArr[i] = i + 1;
+        for (int i = 0, coin = getMinCoin(); i < coinsArr.length; i++, coin++) {
+            coinsArr[i] = coin;
         }
         return coinsArr;
     }
