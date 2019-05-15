@@ -1,22 +1,25 @@
 import algorithms.IAlgo;
 import domains.AlgoResult;
+import inputParameters.IInputParameters;
 import presetParameters.IPresetParameters;
 
-public class App {
+class App {
     private IAlgo algo;
-    private IPresetParameters param;
+    private IPresetParameters presetParameters;
+    private IInputParameters inputParameters;
 
-    public App(IAlgo algo, IPresetParameters param) {
+    App(IAlgo algo, IPresetParameters presetParameters, IInputParameters inputParameters) {
         this.algo = algo;
-        this.param = param;
+        this.presetParameters = presetParameters;
+        this.inputParameters = inputParameters;
     }
 
-    public int[] execute() {
-        int[] costsArr = param.getCostsArr();
-        int[] coinsArr = param.getCoinsArr();
-        int populationSize = param.getPopulationSize();
-        int numberOfPairs = param.getNumberOfPairs();
-        double mutateChance = param.getMutateChance();
+    int[] execute() {
+        int[] costsArr = inputParameters.getCostsArr();
+        int[] coinsArr = presetParameters.getCoinsArr();
+        int populationSize = presetParameters.getPopulationSize();
+        int numberOfPairs = presetParameters.getNumberOfPairs();
+        double mutateChance = presetParameters.getMutateChance();
         AlgoResult result = algo.executeAlgo(costsArr, coinsArr, populationSize, numberOfPairs, mutateChance);
         return result.getIndivid().getChromosome();
     }

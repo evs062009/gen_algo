@@ -22,24 +22,9 @@ public class GeneticAlgo implements IAlgo {
             Individ betterIndivid = population.get(0);
             int terminateCounter = 0;
             int generation = 0;
-
             boolean resetTerminateCounter;
 
             while (true) {
-
-                //
-//                System.out.println();
-//                System.out.println("-----------------------------------");
-//                System.out.println("generation " + generation);
-//                for (int i = 0; i < population.size(); i++) {
-//                    System.out.println(population.get(i).toString(i));
-//                }
-//                System.out.println("-----------------------------------");
-//                System.out.println(": average fitDeviation = " +
-//                        (double) population.stream().map(Individ::getFitDeviation).reduce(0, Integer::sum) /
-//                                population.size() + ", better result: " + betterIndivid.getFitDeviation() + "\n");
-                //
-
                 resetTerminateCounter = false;
 
                 for (Individ individ : population) {
@@ -137,6 +122,7 @@ public class GeneticAlgo implements IAlgo {
 
     private void fitTest(Individ individ, int[] model) {
         int totalDeviation = 0;
+
         for (int i = 0; i < individ.getChromosome().length; i++) {
             int deviation = model[i] - individ.getChromosomeI(i);
             if (deviation > 0) {
@@ -149,13 +135,9 @@ public class GeneticAlgo implements IAlgo {
     private List<Individ> getChildren(List<Individ> parents, int[] model, double mutateChance) {
         List<Individ> children = new ArrayList<>(2);
         int length = parents.get(0).getChromosome().length;
+
         int[] fatherChromosome = parents.get(0).getChromosome();
         int[] motherChromosome = parents.get(1).getChromosome();
-
-        //
-//        System.out.println("fatherChromosome: " + Arrays.toString(fatherChromosome));
-//        System.out.println("motherChromosome: " + Arrays.toString(motherChromosome));
-        //
 
         int[] chromosomeChild1 = new int[length];
         int[] chromosomeChild2 = new int[length];
@@ -163,20 +145,6 @@ public class GeneticAlgo implements IAlgo {
         doCrossover(length, fatherChromosome, motherChromosome, chromosomeChild1, chromosomeChild2);
         fillRest(length, fatherChromosome, chromosomeChild1);
         fillRest(length, motherChromosome, chromosomeChild2);
-
-        //
-        if (Arrays.stream(chromosomeChild1).distinct().count() != chromosomeChild1.length ||
-                Arrays.stream(chromosomeChild2).distinct().count() != chromosomeChild2.length) {
-            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-            System.out.println("repeated genes!!!");
-            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-        }
-        //
-
-        //
-//        System.out.println("chromosomeChild1: " + Arrays.toString(chromosomeChild1));
-//        System.out.println("chromosomeChild2: " + Arrays.toString(chromosomeChild2));
-        //
 
         children.addAll(Arrays.asList(new Individ(chromosomeChild1), new Individ(chromosomeChild2)));
         return children.stream().peek(child -> mutate(child, mutateChance)).peek(child -> fitTest(child, model))
@@ -187,11 +155,6 @@ public class GeneticAlgo implements IAlgo {
                              int[] chromosomeChild2) {
         int startCrossPoint = random.nextInt(length - 1);
         int endCrossPoint = startCrossPoint + random.nextInt(length - startCrossPoint);
-
-        //
-//        System.out.println("startCrossPoint: " + startCrossPoint);
-//        System.out.println("endCrossPoint: " + endCrossPoint);
-        //
 
         for (int crossIndex = startCrossPoint; crossIndex < endCrossPoint; crossIndex++) {
             chromosomeChild1[crossIndex] = motherChromosome[crossIndex];

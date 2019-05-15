@@ -6,12 +6,6 @@ public interface IPresetParameters {
 
     int getMinCoin();
 
-    int getMaxCoin();
-
-    int totalCostMoreThan();
-
-    int[] getCostsArr();
-
     int[] getCoinsArr();
 
     int getNumberOfPairs();
