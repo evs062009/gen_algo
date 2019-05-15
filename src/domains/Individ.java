@@ -1,5 +1,9 @@
 package domains;
 
+/**
+ * Class of individual, what contains chromosome array.
+ * @author eshevtsov
+ */
 public class Individ implements Comparable{
     private int[] chromosome;           //the array of genes of individual
     private int fitDeviation = 0;       //chromosome deviation from the model

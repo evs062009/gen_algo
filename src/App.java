@@ -3,6 +3,10 @@ import domains.AlgoResult;
 import inputParameters.IInputParameters;
 import presetParameters.IPresetParameters;
 
+/**
+ * Class  gets parameters, invoke the algorithm and returns solution.
+ * @author eshevtsov
+ */
 class App {
     private IAlgo algo;
     private IPresetParameters presetParameters;

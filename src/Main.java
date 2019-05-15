@@ -7,6 +7,10 @@ import presetParameters.PresetParameters;
 
 import java.util.Arrays;
 
+/**
+ * The Main class of "ten coins" task.
+ * @author eshevtsov
+ */
 public class Main {
 
     public static void main(String[] args) {

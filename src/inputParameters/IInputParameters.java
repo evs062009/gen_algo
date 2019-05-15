@@ -1,5 +1,6 @@
 package inputParameters;
 
+
 public interface IInputParameters {
 
     /**

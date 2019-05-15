@@ -3,6 +3,10 @@ package inputParameters;
 import java.util.Arrays;
 import java.util.Random;
 
+/**
+ * Class gives input parameters.
+ * @author eshevtsov
+ */
 public class InputParameters implements IInputParameters{
 
     @Override

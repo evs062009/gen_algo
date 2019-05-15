@@ -1,5 +1,9 @@
 package domains;
 
+/**
+ * Class of resulting object.
+ * @author eshevtsov
+ */
 public class AlgoResult {
     private Individ individ;        //the resulting individual
     private int totalGenerations;   //the number of generations, that was necessary to calculate the result

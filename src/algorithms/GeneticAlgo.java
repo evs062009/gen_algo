@@ -9,6 +9,10 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+/**
+ * Class realizes genetic algorithm.
+ * @author eshevtsov
+ */
 public class GeneticAlgo implements IAlgo {
     private Random random = new Random();
 
