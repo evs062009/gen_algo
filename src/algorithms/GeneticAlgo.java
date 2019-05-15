@@ -4,7 +4,9 @@ import domains.Individ;
 
 import java.security.InvalidParameterException;
 import java.util.*;
+import java.util.function.IntPredicate;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class GeneticAlgo implements IAlgo {
@@ -36,7 +38,7 @@ public class GeneticAlgo implements IAlgo {
                 }
                 System.out.println("-----------------------------------");
                 System.out.println(": average fitDeviation = " +
-                        (double)population.stream().map(Individ::getFitDeviation).reduce(0, Integer::sum) /
+                        (double) population.stream().map(Individ::getFitDeviation).reduce(0, Integer::sum) /
                                 population.size() + ", better result: " + betterIndivid.getFitDeviation() + "\n");
                 //
 
@@ -58,7 +60,7 @@ public class GeneticAlgo implements IAlgo {
                     return betterIndivid.getChromosome();
                 }
 
-                population = evolve(model, population);
+                population = getNextGeneration(model, population);
 
                 //
                 counter++;
@@ -81,7 +83,7 @@ public class GeneticAlgo implements IAlgo {
         return population;
     }
 
-    private List<Individ> evolve(int[] model, List<Individ> population) {
+    private List<Individ> getNextGeneration(int[] model, List<Individ> population) {
         List<Individ> parents;
         List<Individ> children = new ArrayList<>(getNumberOfPairs() * 2);
         double totalInvertRatio = population.stream().map(Individ::getInvertRatio).reduce(0.0, Double::sum);
@@ -154,27 +156,48 @@ public class GeneticAlgo implements IAlgo {
         individ.setFitDeviation(totalDeviation);
     }
 
-    //ok
     private List<Individ> getChildren(List<Individ> parents, int[] model) {
         List<Individ> children = new ArrayList<>(2);
         int length = parents.get(0).getChromosome().length;
-        int crossPoint = random.nextInt(length - 2);
-        int[] chromosome1 = new int[length];
-        int[] chromosome2 = new int[length];
+        int[] fatherChromosome = parents.get(0).getChromosome();
+        int[] motherChromosome = parents.get(1).getChromosome();
+        int[] chromosomeChild1 = new int[length];
+        int[] chromosomeChild2 = new int[length];
 
-        for (int i = 0; i < length; i++) {
-            if (i <= crossPoint) {
-                chromosome1[i] = parents.get(0).getChromosomeI(i);
-                chromosome2[i] = parents.get(1).getChromosomeI(i);
-            } else {
-                chromosome1[i] = parents.get(1).getChromosomeI(i);
-                chromosome2[i] = parents.get(0).getChromosomeI(i);
+        doCrossover(length, fatherChromosome, motherChromosome, chromosomeChild1, chromosomeChild2);
+        fillRest(length, motherChromosome, chromosomeChild1);
+        fillRest(length, fatherChromosome, chromosomeChild2);
+
+        children.addAll(Arrays.asList(new Individ(chromosomeChild1), new Individ(chromosomeChild2)));
+        return children.stream().peek(this::mutate).peek(child -> fitTest(child, model)).collect(Collectors.toList());
+    }
+
+    private void doCrossover(int length, int[] fatherChromosome, int[] motherChromosome, int[] chromosomeChild1,
+                             int[] chromosomeChild2) {
+        int startCrossPoint = random.nextInt(length - 1);
+        int endCrossPoint = startCrossPoint + random.nextInt(length - startCrossPoint);
+
+        for (int crossIndex = startCrossPoint; crossIndex < endCrossPoint; crossIndex++) {
+            chromosomeChild1[crossIndex] = motherChromosome[crossIndex];
+            chromosomeChild2[crossIndex] = fatherChromosome[crossIndex];
+        }
+    }
+
+    private void fillRest(int length, int[] parentChromosome, int[] childChromosome) {
+        for (int childIndex = 0, parentIndex = 0; childIndex < length; childIndex++, parentIndex++) {
+            if (childChromosome[childIndex] == 0) {
+                int finalParentIndex = parentIndex;
+                try{
+                    if (IntStream.of(childChromosome).noneMatch(x -> x == parentChromosome[finalParentIndex])) {
+                        childIndex--;
+                    } else {
+                        childChromosome[childIndex] = parentChromosome[parentIndex];
+                    }
+                } catch (IndexOutOfBoundsException ex){
+                    ex.printStackTrace();
+                }
             }
         }
-        children.addAll(Arrays.asList(  new Individ(chromosome1),
-                                        new Individ(chromosome2)));
-        return children.stream().peek(this::mutate).peek(child -> fitTest(child, model))
-                .collect(Collectors.toList());
     }
 
     //ok
