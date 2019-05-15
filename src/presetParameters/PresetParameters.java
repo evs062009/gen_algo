@@ -52,4 +52,19 @@ public class PresetParameters implements IPresetParameters {
         }
         return coinsArr;
     }
+
+    @Override
+    public int getPopulationSize() {
+        return 14;
+    }
+
+    @Override
+    public int getNumberOfPairs() {
+        return 3;
+    }
+
+    @Override
+    public double getMutateChance() {
+        return 0.2;
+    }
 }

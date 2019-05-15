@@ -13,4 +13,10 @@ public interface IPresetParameters {
     int[] getCostsArr();
 
     int[] getCoinsArr();
+
+    int getNumberOfPairs();
+
+    double getMutateChance();
+
+    int getPopulationSize();
 }

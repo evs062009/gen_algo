@@ -1,12 +1,8 @@
 package algorithms;
 
+import domains.AlgoResult;
+
 public interface IAlgo {
 
-    int[] executeAlgo(int[] model, int[] input);
-
-    int getNumberOfPairs();
-
-    double getMutateChance();
-
-    int getPopulationSize();
+    AlgoResult executeAlgo(int[] model, int[] input, int populationSize, int numberOfPairs, double mutateChance);
 }
