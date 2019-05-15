@@ -47,7 +47,7 @@ public class GeneticAlgo implements IAlgo {
                 generation++;
             }
         } else {
-            throw new InvalidParameterException("Coins quantity is not equal checkpoint quantity.");
+            throw new InvalidParameterException("Coins quantity is not equal checkpoints quantity.");
         }
     }
 
@@ -66,10 +66,10 @@ public class GeneticAlgo implements IAlgo {
                                             double mutateChance) {
         List<Individ> parents;
         List<Individ> children = new ArrayList<>(numberOfPairs * 2);
-        double totalInvertRatio = population.stream().map(Individ::getInvertRatio).reduce(0.0, Double::sum);
+        double totalInverseRatio = population.stream().map(Individ::getInverseRatio).reduce(0.0, Double::sum);
 
         for (int i = 0; i < numberOfPairs; i++) {
-            parents = getParents(population, totalInvertRatio);
+            parents = getParents(population, totalInverseRatio);
             children.addAll(getChildren(parents, model, mutateChance));
         }
         return createNewPopulation(population, children);
@@ -89,10 +89,10 @@ public class GeneticAlgo implements IAlgo {
         arr[j] = temp;
     }
 
-    private List<Individ> getParents(List<Individ> population, double totalInvertRatio) {
+    private List<Individ> getParents(List<Individ> population, double totalInverseRatio) {
         List<Individ> parents = new ArrayList<>(2);
-        int fatherIndex = chooseParent(population, totalInvertRatio);
-        int motherIndex = chooseParent(population, totalInvertRatio);
+        int fatherIndex = chooseParent(population, totalInverseRatio);
+        int motherIndex = chooseParent(population, totalInverseRatio);
 
         if (motherIndex == fatherIndex) {
             motherIndex = motherIndex + population.size() / 2;
@@ -104,14 +104,14 @@ public class GeneticAlgo implements IAlgo {
         return parents;
     }
 
-    private int chooseParent(List<Individ> population, double totalInvertRatio) {
+    private int chooseParent(List<Individ> population, double totalInverseRatio) {
         double parentSign = random.nextDouble();
         double bottomBound = 0;
         double topBound;
         int individIndex;
 
         for (individIndex = 0; individIndex < population.size() - 1; individIndex++) {
-            topBound = bottomBound + population.get(individIndex).getInvertRatio() / totalInvertRatio;
+            topBound = bottomBound + population.get(individIndex).getInverseRatio() / totalInverseRatio;
             if (parentSign >= bottomBound && parentSign < topBound) {
                 return individIndex;
             }

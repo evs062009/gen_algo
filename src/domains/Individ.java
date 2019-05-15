@@ -1,8 +1,8 @@
 package domains;
 
 public class Individ implements Comparable{
-    private int[] chromosome;
-    private int fitDeviation = 0;
+    private int[] chromosome;           //the array of genes of individual
+    private int fitDeviation = 0;       //chromosome deviation from the model
 
     public Individ(int[] chromosome) {
         this.chromosome = chromosome;
@@ -24,7 +24,13 @@ public class Individ implements Comparable{
         this.fitDeviation = fitDeviation;
     }
 
-    public double getInvertRatio() {
+    /**
+     * Returns the value of inverse ratio, that determine by chromosome deviation value.
+     * If chromosome deviation equals 0, the inverse ratio sets as enough big number.
+     * Otherwise the inverse ratio is calculated as 1 / chromosome deviation;
+     * @return the value of inverse ratio
+     */
+    public double getInverseRatio() {
         if (fitDeviation == 0){
             return 1000000.0;
         } else {
