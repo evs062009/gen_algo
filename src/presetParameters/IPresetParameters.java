@@ -27,10 +27,10 @@ public interface IPresetParameters {
     int getPopulationSize();
 
     /**
-     * Returns the number of parents pairs for breeding.
-     * @return the number of parents pairs for breeding
+     * Returns the number of breeding for generation.
+     * @return the number of breeding for generation
      */
-    int getNumberOfPairs();
+    int getNumberOfBreeding();
 
     /**
      * Returns the value of offspring`s chance of mutation (in range 0.0 - 0.99).

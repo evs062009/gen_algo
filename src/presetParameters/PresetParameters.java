@@ -27,7 +27,7 @@ public class PresetParameters implements IPresetParameters {
     }
 
     @Override
-    public int getNumberOfPairs() {
+    public int getNumberOfBreeding() {
         return 3;
     }
 

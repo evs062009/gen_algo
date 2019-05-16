@@ -10,14 +10,14 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
- * Class realizes genetic algorithm.
+ * Class realizes classic genetic algorithm, with crossover and mutate for new generation creating.
  * @author eshevtsov
  */
-public class GeneticAlgo implements IAlgo {
+public class ClassicGeneticAlgo implements IAlgo {
     private Random random = new Random();
 
     @Override
-    public AlgoResult executeAlgo(int[] model, int[] input, int populationSize, int numberOfPairs,
+    public AlgoResult executeAlgo(int[] model, int[] input, int populationSize, int numberOfBreeding,
                                   double mutateChance) {
         if (model.length == input.length) {
 
@@ -47,7 +47,7 @@ public class GeneticAlgo implements IAlgo {
                     return new AlgoResult(betterIndivid, generation);
                 }
 
-                population = getNextGeneration(model, population, numberOfPairs, mutateChance);
+                population = getNextGeneration(model, population, numberOfBreeding, mutateChance);
                 generation++;
             }
         } else {
@@ -66,13 +66,13 @@ public class GeneticAlgo implements IAlgo {
         return population;
     }
 
-    private List<Individ> getNextGeneration(int[] model, List<Individ> population, int numberOfPairs,
+    private List<Individ> getNextGeneration(int[] model, List<Individ> population, int numberOfBreeding,
                                             double mutateChance) {
         List<Individ> parents;
-        List<Individ> children = new ArrayList<>(numberOfPairs * 2);
+        List<Individ> children = new ArrayList<>(numberOfBreeding * 2);
         double totalInverseRatio = population.stream().map(Individ::getInverseRatio).reduce(0.0, Double::sum);
 
-        for (int i = 0; i < numberOfPairs; i++) {
+        for (int i = 0; i < numberOfBreeding; i++) {
             parents = getParents(population, totalInverseRatio);
             children.addAll(getChildren(parents, model, mutateChance));
         }
@@ -124,7 +124,7 @@ public class GeneticAlgo implements IAlgo {
         return individIndex;
     }
 
-    private void fitTest(Individ individ, int[] model) {
+    void fitTest(Individ individ, int[] model) {
         int totalDeviation = 0;
 
         for (int i = 0; i < individ.getChromosome().length; i++) {
@@ -136,7 +136,7 @@ public class GeneticAlgo implements IAlgo {
         individ.setFitDeviation(totalDeviation);
     }
 
-    private List<Individ> getChildren(List<Individ> parents, int[] model, double mutateChance) {
+    protected List<Individ> getChildren(List<Individ> parents, int[] model, double mutateChance) {
         List<Individ> children = new ArrayList<>(2);
         int length = parents.get(0).getChromosome().length;
 
@@ -151,8 +151,8 @@ public class GeneticAlgo implements IAlgo {
         fillRest(length, motherChromosome, chromosomeChild2);
 
         children.addAll(Arrays.asList(new Individ(chromosomeChild1), new Individ(chromosomeChild2)));
-        return children.stream().peek(child -> mutate(child, mutateChance)).peek(child -> fitTest(child, model))
-                .collect(Collectors.toList());
+        return children.stream().peek(child -> mutate(child.getChromosome(), mutateChance)).
+                peek(child -> fitTest(child, model)).collect(Collectors.toList());
     }
 
     private void doCrossover(int length, int[] fatherChromosome, int[] motherChromosome, int[] chromosomeChild1,
@@ -181,14 +181,14 @@ public class GeneticAlgo implements IAlgo {
         }
     }
 
-    private void mutate(Individ child, double mutateChance) {
+    void mutate(/*Individ child*/ int[] chromosome, double mutateChance) {
         double mutateSign = random.nextDouble();
         if (mutateSign < mutateChance) {
-            int length = child.getChromosome().length;
+            int length = chromosome.length;
             int index1 = random.nextInt(length);
             int index2 = random.nextInt(length);
             if (index1 != index2) {
-                swap(child.getChromosome(), index1, index2);
+                swap(chromosome, index1, index2);
             }
         }
     }

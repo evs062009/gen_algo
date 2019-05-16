@@ -7,6 +7,9 @@ package domains;
 public class AlgoResult {
     private Individ individ;        //the resulting individual
     private int totalGenerations;   //the number of generations, that was necessary to calculate the result
+    private int populationSize;
+    private int numberOfBreeding;
+    private double mutateChance;
 
     public AlgoResult(Individ individ, int totalGenerations) {
         this.individ = individ;
@@ -19,5 +22,29 @@ public class AlgoResult {
 
     public int getTotalGenerations() {
         return totalGenerations;
+    }
+
+    public int getPopulationSize() {
+        return populationSize;
+    }
+
+    public int getNumberOfBreeding() {
+        return numberOfBreeding;
+    }
+
+    public double getMutateChance() {
+        return mutateChance;
+    }
+
+    public void setPopulationSize(int populationSize) {
+        this.populationSize = populationSize;
+    }
+
+    public void setNumberOfBreeding(int numberOfBreeding) {
+        this.numberOfBreeding = numberOfBreeding;
+    }
+
+    public void setMutateChance(double mutateChance) {
+        this.mutateChance = mutateChance;
     }
 }
