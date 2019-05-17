@@ -47,4 +47,22 @@ public class AlgoResult {
     public void setMutateChance(double mutateChance) {
         this.mutateChance = mutateChance;
     }
+
+    /**
+     * Check is this result better when another one, considering fitness deviation, number of generations and
+     * population size.
+     * @param anotherRes compared {@code AlgoResult} object
+     * @return true is this result better when another one, false otherwise
+     */
+    public boolean isBetter(AlgoResult anotherRes){
+        if (individ.getFitDeviation() < anotherRes.individ.getFitDeviation()){
+            return true;
+        }
+        if (individ.getFitDeviation() == anotherRes.individ.getFitDeviation() &&
+                totalGenerations < anotherRes.totalGenerations){
+            return true;
+        }
+        return  (individ.getFitDeviation() == anotherRes.individ.getFitDeviation() &&
+                totalGenerations == anotherRes.totalGenerations && populationSize < anotherRes.populationSize);
+    }
 }

@@ -8,11 +8,11 @@ import presetParameters.IPresetParameters;
 import presetParameters.PresetParameters;
 
 import java.util.Arrays;
-import java.util.stream.DoubleStream;
-import java.util.stream.IntStream;
 
 /**
- * Class compares two algorithms solutions of one problem.
+ * Class calculates and shows two results of of one problem solving. The results are created by two genetic algorithms
+ * (with classic breeding ang breeding by only mutation), using ranges of algorithms parameters (like population size
+ * etc.). The best result for each algorithm is selected for showing.
  *
  * @author eshevtsov
  */
@@ -22,55 +22,20 @@ class App {
     private IAlgo classicAlgo = new ClassicGeneticAlgo();
     private IAlgo onlyMutateAlgo = new OnlyMutateGeneticAlgo();
 
-    void execute() {
+    void showResults() {
+        int[] model = inputParameters.getCostsArr();
+        int[] input = presetParameters.getCoinsArr();
         int[] populationSizeRange = {5, 20};
         int[] numberOfBreedingRange = {1, 5};
         int[] mutateChanceRange = {1, 5};
 
-        int size = 10;
-        int[] betterSolution = new int[size];
-        double[] generatDiff = new double[size];
-        double[] populatDiff = new double[size];
-
-        for (int i = 0; i < size; i++) {
-            int[] model = inputParameters.getCostsArr();
-            int[] input = presetParameters.getCoinsArr();
-
-            AlgoResult classicRes = getBestResult(model, input, classicAlgo, populationSizeRange,
-                    numberOfBreedingRange, mutateChanceRange);
-            AlgoResult mutateRes = getBestResult(model, input, onlyMutateAlgo, populationSizeRange,
-                    numberOfBreedingRange, mutateChanceRange);
-
-            if (classicRes.getIndivid().getFitDeviation() < mutateRes.getIndivid().getFitDeviation()) {
-                betterSolution[i] = 1;
-            } else if (mutateRes.getIndivid().getFitDeviation() < classicRes.getIndivid().getFitDeviation()) {
-                betterSolution[i] = -1;
-            } else {
-                betterSolution[i] = 0;
-            }
-
-            try {
-                generatDiff[i] = classicRes.getTotalGenerations() / mutateRes.getTotalGenerations();
-            } catch (ArithmeticException ex) {
-                generatDiff[i] = 0.05;
-            }
-            populatDiff[i] = classicRes.getPopulationSize() / mutateRes.getPopulationSize();
-        }
-
-        long classicBetterSolution = IntStream.of(betterSolution).filter(x -> x == 1).count();
-        if (classicBetterSolution != 0) {
-            System.out.println("classic algo find better solution " + classicBetterSolution);
-        }
-        long mutateBetterSolution = IntStream.of(betterSolution).filter(x -> x == -1).count();
-        if (mutateBetterSolution != 0) {
-            System.out.println("mutate algo find better solution " + mutateBetterSolution);
-        }
-        double generateDiffAv = DoubleStream.of(generatDiff).average().getAsDouble();
-        System.out.println("generation better in " + ((generateDiffAv > 1) ? ("classic by " + (generateDiffAv - 1))
-                : ("mutate by " + (1 - generateDiffAv))));
-        double popSizeAv = DoubleStream.of(populatDiff).average().getAsDouble();
-        System.out.println("popSize better in " + ((popSizeAv > 1) ? ("classic by " + (popSizeAv - 1))
-                : ("mutate by " + (1 - popSizeAv))));
+        AlgoResult classicRes = getBestResult(model, input, classicAlgo, populationSizeRange, numberOfBreedingRange,
+                mutateChanceRange);
+        AlgoResult mutateRes = getBestResult(model, input, onlyMutateAlgo, populationSizeRange, numberOfBreedingRange,
+                mutateChanceRange);
+        System.out.println("Array of costs: " + Arrays.toString(model));
+        printResult(classicRes, "Result of classic genetic algorithm:");
+        printResult(mutateRes, "Result of genetic algorithm with breeding by mutation only:");
     }
 
     private AlgoResult getBestResult(int[] model, int[] input, IAlgo algo, int[] popSizeRange, int[] numBreedingRange,
@@ -84,16 +49,11 @@ class App {
 
                     AlgoResult result = algo.executeAlgo(model, input, popIndex, breedingIndex, mutatChance);
 
-                    int fitDeviation = result.getIndivid().getFitDeviation();
-                    int totalGenerations = result.getTotalGenerations();
-
                     result.setPopulationSize(popIndex);
                     result.setNumberOfBreeding(breedingIndex);
                     result.setMutateChance(mutatChance);
 
-                    if (bestResult == null || fitDeviation < bestResult.getIndivid().getFitDeviation()
-                            || ((fitDeviation == bestResult.getIndivid().getFitDeviation())
-                            && totalGenerations < bestResult.getTotalGenerations())) {
+                    if (bestResult == null || result.isBetter(bestResult)) {
                         bestResult = result;
                     }
                 }
