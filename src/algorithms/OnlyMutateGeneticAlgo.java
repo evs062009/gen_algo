@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Class realizes genetic algorithm with only mutate (100% chance, without crossover)for new generation creating.
+ * Class realizes genetic algorithm with only mutate (100% chance, without crossover) for new generation creating.
  * @author eshevtsov
  */
 public class OnlyMutateGeneticAlgo extends ClassicGeneticAlgo {

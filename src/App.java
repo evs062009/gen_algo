@@ -1,26 +1,30 @@
-import algorithms.ClassicGeneticAlgo;
 import algorithms.IAlgo;
-import algorithms.OnlyMutateGeneticAlgo;
 import domains.AlgoResult;
 import inputParameters.IInputParameters;
-import inputParameters.InputParameters;
 import presetParameters.IPresetParameters;
-import presetParameters.PresetParameters;
 
 import java.util.Arrays;
 
 /**
- * Class calculates and shows two results of of one problem solving. The results are created by two genetic algorithms
+ * Class calculates and shows two results of one problem solving. The results are created by two genetic algorithms
  * (with classic breeding ang breeding by only mutation), using ranges of algorithms parameters (like population size
  * etc.). The best result for each algorithm is selected for showing.
  *
  * @author eshevtsov
  */
 class App {
-    private IPresetParameters presetParameters = new PresetParameters();
-    private IInputParameters inputParameters = new InputParameters();
-    private IAlgo classicAlgo = new ClassicGeneticAlgo();
-    private IAlgo onlyMutateAlgo = new OnlyMutateGeneticAlgo();
+    private IPresetParameters presetParameters;
+    private IInputParameters inputParameters;
+    private IAlgo classicAlgo;
+    private IAlgo onlyMutateAlgo;
+
+    App(IPresetParameters presetParameters, IInputParameters inputParameters, IAlgo classicAlgo,
+               IAlgo onlyMutateAlgo) {
+        this.presetParameters = presetParameters;
+        this.inputParameters = inputParameters;
+        this.classicAlgo = classicAlgo;
+        this.onlyMutateAlgo = onlyMutateAlgo;
+    }
 
     void showResults() {
         int[] model = inputParameters.getCostsArr();
@@ -34,8 +38,8 @@ class App {
         AlgoResult mutateRes = getBestResult(model, input, onlyMutateAlgo, populationSizeRange, numberOfBreedingRange,
                 mutateChanceRange);
         System.out.println("Array of costs: " + Arrays.toString(model));
-        printResult(classicRes, "Result of classic genetic algorithm:");
-        printResult(mutateRes, "Result of genetic algorithm with breeding by mutation only:");
+        printResult(classicRes, "Result of classic genetic algorithm:", true);
+        printResult(mutateRes, "Result of genetic algorithm with breeding by mutation only:", false);
     }
 
     private AlgoResult getBestResult(int[] model, int[] input, IAlgo algo, int[] popSizeRange, int[] numBreedingRange,
@@ -62,7 +66,7 @@ class App {
         return bestResult;
     }
 
-    private void printResult(AlgoResult result, String message) {
+    private void printResult(AlgoResult result, String message, boolean isClassicAlgo) {
         String solution = Arrays.toString(result.getIndivid().getChromosome());
         int fitDev = result.getIndivid().getFitDeviation();
         int totGen = result.getTotalGenerations();
@@ -72,7 +76,10 @@ class App {
 
         System.out.println("-----------------------------------------------------------------------------------------");
         System.out.println(message);
-        System.out.println("solution: " + solution + "\tfitDev = " + fitDev + "\ttotGen = " + totGen);
-        System.out.println("popSize = " + popSize + "\tbreeding = " + breeding + "\tmutChance = " + mutChance);
+        System.out.println("solution: " + solution + ", debt = " + fitDev);
+        System.out.println("generation totally: " + totGen);
+        System.out.println("population size: " + popSize);
+        System.out.println("pairs for breeding: " + breeding);
+        System.out.println((isClassicAlgo)?("mutation chance: " + mutChance):(""));
     }
 }
